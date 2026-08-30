@@ -32,7 +32,7 @@ def receive_update():
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+@bot.message_handler(func=lambda m: m.text =="💵 سعر الدولار")
     markup.add(types.KeyboardButton("🌤️ طقس اللاذقية مباشر"), types.KeyboardButton("💵 أسعار الدولار المحدثة"))
     bot.reply_to(message, "أهلاً بك يا مطور سلمان. تم ربط الأسعار الحية تلقائياً 24 ساعة!", reply_markup=markup)
 
@@ -45,10 +45,9 @@ def get_weather(message):
     temp_surface = temp_air - 2
     report = f"📍 طقس محافظة اللاذقية الحصري:\n━━━━━━━━━━━━━━━━━━\n🌡️ درجة حرارة الجو الحالية: {temp_air}°C\n🌍 حرارة السطح الحية (المولّدة): {temp_surface}°C\n🛡️ _وضع الحماية السحابي نشط._"
     bot.reply_to(message, report, parse_mode="Markdown")
-
-@bot.message_handler(func=lambda m: m.text == "💵 أسعار الدولار المحدثة")
-def get_dollar_rates(message):
-    waiting_msg = bot.reply_to(message, "⚡ جاري قراءة أسعار الدولار الحية من موقع الليرة اليوم...")
+@bot.message_handler(func=lambda m: m.text == "💵 سعر الدولار
+def (get_dollar_retes(message):
+    waitingmsg = bot.reply_to(message, "⚡ جاري قراءة أسعار الدولار الحية من موقع الليرة اليوم...")
     buy, sell = fetch_live_dollar_rates()
     report = f"💵 أسعار صرف الدولار في سوريا (تحديث فوري):\n━━━━━━━━━━━━━━━━━━\n🌐 المصدر المعتمد: موقع الليرة اليوم\n🇸🇾 السوق السوداء المحلية:\n🔹 شراء: {buy} ل.س\n🔹 مبيع: {sell} ل.س\n\n⚠️ _الأسعار تسحب تلقائياً من خادم الموقع مباشرة._"
     bot.delete_message(message.chat.id, waiting_msg.message_id)
