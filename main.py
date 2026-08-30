@@ -6,7 +6,7 @@ from telebot import types
 TOKEN = "8702344053:AAHqe6_HtIdNhUaF6rE1fwqSouaqpn0wabU"
 RENDER_URL = os.environ.get("RENDER_EXTERNAL_URL")
 bot = telebot.TeleBot(TOKEN, threaded=False)
-app = Flask(name)
+app = Flask(__name__)
 
 @app.route('/')
 def home(): return "سيرفر سلمان السحابي يراقب الأسعار والطقس مباشر 24 ساعة!", 200
