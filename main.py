@@ -1,23 +1,45 @@
+
 import os
 import requests
+from bs4 import BeautifulSoup
 from flask import Flask, request
 import telebot
 from telebot import types
 
-# إعداد التوكن المعتمد لبوت سلمان
+# إعداد التوكن المعتمد ورابط السيرفر
 TOKEN = "8702344053:AAHqe6_HtIdNhUaF6rE1fwqSouaqpn0wabU"
-
-# جلب رابط الاستضافة الخارجي تلقائياً من Render عند الرفع
 RENDER_URL = os.environ.get("RENDER_EXTERNAL_URL")
 
-# تهيئة البوت وتطبيق Flask
 bot = telebot.TeleBot(TOKEN, threaded=False)
-app = Flask(__name__)
+app = Flask(name)
 
 # --- [ واجهة الاستضافة الأساسية ] ---
 @app.route('/')
 def home():
-    return "البوت يعمل بنجاح على سيرفر Render السحابي على مدار 24 ساعة!", 200
+    return "سيرفر سلمان السحابي يراقب الأسعار والطقس مباشر 24 ساعة!", 200
+
+# --- [ دالة قشط أسعار الدولار الحية من موقع الليرة اليوم ] ---
+def fetch_live_dollar_rates():
+    try:
+        # الدخول للموقع بطلب رسمي يحاكي المتصفحات لتجنب الحظر
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+        url = "https://sp-today.com/"
+        response = requests.get(url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # استخراج أرقام الشراء والمبيع بالاعتماد على الفئات الخاصة بموقع الليرة اليوم
+            # الكود يقرأ أول قيم لجدول الدولار الأمريكي المحدثة فوراً
+            buy_price = soup.find('span', {'id': 'usd_buy'}) or soup.find('td', {'class': 'buy'})
+            sell_price = soup.find('span', {'id': 'usd_sell'}) or soup.find('td', {'class': 'sell'})
+            
+            if buy_price and sell_price:
+                return buy_price.text.strip(), sell_price.text.strip()
+                
+        return "غير متوفر حالياً", "غير متوفر حالياً"
+    except Exception:
+        return "خطأ في السحب", "خطأ في السحب"
 
 # --- [ نقطة استقبال تحديثات التليجرام Webhook ] ---
 @app.route(f'/{TOKEN}', methods=['POST'])
@@ -27,11 +49,9 @@ def receive_update():
         update = telebot.types.Update.de_json(json_string)
         bot.process_new_updates([update])
         return "OK", 200
-    else:
-        return "بروتوكول غير مدعوم", 403
+    return "بروتوكول غير مدعوم", 403
 
 # --- [ منطق البوت التفاعلي المعتمد ] ---
-
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
@@ -41,7 +61,7 @@ def send_welcome(message):
     
     bot.reply_to(
         message, 
-        "أهلاً بك يا مطور سلمان في بوت الطقس والأسعار السحابي المستقر 24 ساعة. اختر من الأزرار أدناه:", 
+        "أهلاً بك يا مطور سلمان. البوت مربوط الآن بموقع الليرة اليوم سحابياً لتحديث الأسعار تلقائياً 24 ساعة!", 
         reply_markup=markup
     )
 
@@ -57,8 +77,7 @@ def get_weather(message):
     except Exception:
         temp_air = 22  
 
-    # خوارزمية الحماية الحية: حساب حرارة السطح بطرح درجتين
-    temp_surface = temp_air - 2
+    temp_surface = temp_air - 2 # خوارزمية الحماية بطرح درجتين لسطح الأرض الحية
 
     weather_report = (
         f"📍 طقس محافظة اللاذقية الحصري:\n"
@@ -71,22 +90,26 @@ def get_weather(message):
 
 @bot.message_handler(func=lambda message: message.text == "💵 أسعار الدولار المحدثة")
 def get_dollar_rates(message):
-    dollar_report = (
-        f"💵 أسعار صرف الدولار المحدثة الآن:\n"
-        f"━━━━━━━━━━━━━━━━━━\n"
-        f"🇸🇾 السوق المحلية (دمشق/اللاذقية):\n"
-        f"🔹 مبيع: مستقر وضمن الحدود الطبيعية\n"
-        f"🔹 شراء: متوافق مع تحديثات السوق الحية\n\n"
-        f"⚠️ _السيرفر يراقب الأسعار تلقائياً بدون حاجة لإنترنت محلي._"
+    waiting_msg = bot.reply_to(message, "⚡ جاري قراءة أسعار الدولار الحية من موقع الليرة اليوم...")
+    
+    # استدعاء دالة القشط لجلب الأرقام الحقيقية الآن من الموقع
+    buy, sell = fetch_live_dollar_rates()
+    
+    dollar_report = (f"━━━━━━━━━━━━━━━━━━\n"
+        f"🌐 المصدر المعتمد: موقع الليرة اليوم\n"
+        f"🇸🇾 السوق السوداء المحلية:\n"
+        f"🔹 شراء: {buy} ل.س\n"
+        f"🔹 مبيع: {sell} ل.س\n\n"
+        f"⚠️ _الأسعار تسحب تلقائياً من خادم الموقع مباشرة لضمان الدقة._"
     )
+    bot.delete_message(message.chat.id, waiting_msg.message_id)
     bot.reply_to(message, dollar_report, parse_mode="Markdown")
 
-# --- [ تفعيل الـ Webhook تلقائياً عند التشغيل ] ---
+# --- [ تفعيل الـ Webhook تلقائياً ] ---
 if RENDER_URL:
     bot.remove_webhook()
     bot.set_webhook(url=f"{RENDER_URL}/{TOKEN}")
-    print(f"تم ربط البوت بالـ Webhook على الرابط: {RENDER_URL}/{TOKEN}")
 
-if __name__ == "__main__":
-    # التشغيل المحلي للمطور سلمان أثناء التجربة فقط
+if name == "main":
     app.run(host="0.0.0.0", port=5000)
+        f"💵 أسعار صرف الدولار في سوريا (تحديث فوري):\n"
