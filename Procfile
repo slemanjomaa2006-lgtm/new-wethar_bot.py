@@ -1,1 +1,1 @@
-web: gunicorn new-wethar_bot.py
+web: gunicorn new-wethar_bot:app
