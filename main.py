@@ -78,7 +78,7 @@ def handle_services(message):
         bot.reply_to(message, "❌ عذراً سلمان، يرجى الضغط على الأزرار الظاهرة في الأسفل فقط.")
 
 # تشغيل خادم الويب والبوت معاً في خيوط مستقلة
-if name == 'main':
+if __name__ == '__main+__':
     t = Thread(target=run_flask)
     t.start()
     
