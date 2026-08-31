@@ -1,34 +1,25 @@
-
 import telebot
 from telebot import types
 import requests
-from flask import Flask, request
+from threading import Thread
 import os
+import time
 
 # 1. التوكن الخاص ببوت سلمان
 BOT_TOKEN = "8702344053:AAHqe6_HtIdNhUaF6rE1fwqSouaqpn0wabU"
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# 2. إنشاء خادم الويب المتوافق برمجياً مع Render
+# 2. إنشاء خادم الويب المتوافق برمجياً لمنع انهيار Render
+from flask import Flask
 app = Flask(__name__)
 
-# الرابط الخاص بمشروعك
-WEBHOOK_URL = "https://onrender.com"
-
-@app.route('/' + BOT_TOKEN, methods=['POST'])
-def getMessage():
-    try:
-        json_string = request.get_data().decode('utf-8')
-        update = telebot.types.Update.de_json(json_string)
-        bot.process_new_updates([update])
-        return "!", 200
-    except Exception as e:
-        print(f"Error processing update: {e}")
-        return "Error", 500
-
 @app.route("/")
-def webhook():
-    return "البوت يعمل بنشاط وببيانات حية 24 ساعة مجاناً عبر الـ Webhook! 🚀", 200
+def home():
+    return "البوت يعمل بنشاط وببيانات حية 24 ساعة مجاناً عبر نظام البولينج المستقر! 🚀", 200
+
+def run_flask():
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port)
 
 # دالة جلب طقس اللاذقية الحي والمباشر
 def get_weather():
@@ -80,14 +71,19 @@ def handle_services(message):
     else:
         bot.reply_to(message, "❌ عذراً سلمان، يرجى الضغط على الأزرار الظاهرة في الأسفل فقط.")
 
+# تشغيل البوت باستمرار في خيط منفصل وحذف الـ Webhook المعلق تلقائياً
 if __name__ == '__main__':
-    # تفعيل الـ Webhook مرة واحدة فقط عند إقلاع السيرفر لضمان الاستقرار ومنع خطأ 500
+    # تنظيف تليجرام من أي ربط ويب قديم معلق
     try:
         bot.remove_webhook()
-        bot.set_webhook(url=WEBHOOK_URL + BOT_TOKEN)
-        print("Webhook set successfully!")
-    except Exception as e:
-        print(f"Failed to set webhook: {e}")
+        time.sleep(1)
+    except:
+        pass
         
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
+    # تشغيل سيرفر الويب لخداع الاستضافة في خيط خلفي
+    t = Thread(target=run_flask)
+    t.start()
+    
+    # تشغيل البوت بنظام الاستدعاء اللا نهائي لتخطي قيود الشبكة
+    print("تم تفعيل نظام البولينج المستقر والمضاد للنوم...")
+    bot.infinity_polling(skip_pending=True)
