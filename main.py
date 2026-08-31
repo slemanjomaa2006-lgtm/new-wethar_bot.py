@@ -35,20 +35,21 @@ def send_welcome(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
     markup.add(types.KeyboardButton("🌤️ طقس اللاذقية مباشر"), types.KeyboardButton("💵 سعر الدولار"))
     bot.reply_to(message, "أهلاً بك يا مطور سلمان. تم ربط الأسعار الحية تلقائياً 24 ساعة!", reply_markup=markup)
-
-@bot.message_handler(func=lambda m: m.text == "🌤️ طقس اللاذقية مباشر")
+@bot.message_handler(func=lambda m: m.text == "⛅ طقس اللاذقية مباشر")
 def get_weather(message):
     try:
         r = requests.get("https://wttr.in", timeout=10).json()
-        temp_air = int(r['current_condition'][0]['temp_C'])
+        temp_air = int(r['current_condition']['temp_C'])
     except:
         temp_air = 22
+
     temp_surface = temp_air - 2
-    report = f"📍 طقس محافظة اللاذقية الحصري:\n━━━━━━━━━━━━━━━━━━\n🌡️ درجة حرارة الجو الحالية: {temp_air}°C\n🌍 حرارة السطح الحية (المولّدة): {temp_surface}°C\n🛡️ _وضع الحماية السحابي نشط._"
+    report = f"📊 *طقس محافظة اللاذقية الحصري*:\n\n🌡 درجة حرارة الجو الحالية: {temp_air}°C"
     bot.reply_to(message, report, parse_mode="Markdown")
-        @bot.message_handler(func=lambda m: m.text == "💵 سعر الدولار")
-def (get_dollar_retes(message):
-    waitingmsg = bot.reply_to(message, "⚡ جاري قراءة أسعار الدولار الحية من موقع الليرة اليوم...")
+
+@bot.message_handler(func=lambda m: m.text == "💵 سعر الدولار")
+def get_dollar_rates(message):
+    waitingmsg = bot.reply_to(message, "⚡ جاري قراءة أسعار الدولار الحية...")
     buy, sell = fetch_live_dollar_rates()
     report = f"💵 أسعار صرف الدولار في سوريا (تحديث فوري):\n━━━━━━━━━━━━━━━━━━\n🌐 المصدر المعتمد: موقع الليرة اليوم\n🇸🇾 السوق السوداء المحلية:\n🔹 شراء: {buy} ل.س\n🔹 مبيع: {sell} ل.س\n\n⚠️ _الأسعار تسحب تلقائياً من خادم الموقع مباشرة._"
     bot.delete_message(message.chat.id, waiting_msg.message_id)
