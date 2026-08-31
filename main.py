@@ -8,7 +8,7 @@ from telebot import types
 TOKEN = os.getenv("TOKEN")
 RENDER_URL = os.getenv("RENDER_URL")
 bot = telebot.TeleBot(TOKEN)
-app = Flask(name)
+app = Flask(__name__)
 
 @app.route(f"/{TOKEN}", methods=["POST"])
 def redirect_message():
@@ -61,5 +61,5 @@ if RENDER_URL:
     bot.remove_webhook()
     bot.set_webhook(url=f"{RENDER_URL}/{TOKEN}")
 
-if name == "main":
+if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
