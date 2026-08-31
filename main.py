@@ -10,7 +10,7 @@ BOT_TOKEN = "8702344053:AAHqe6_HtIdNhUaF6rE1fwqSouaqpn0wabU"
 bot = telebot.TeleBot(BOT_TOKEN)
 
 # 2. إنشاء خادم الويب المتوافق برمجياً مع Render
-app = Flask(name)
+app = Flask(__name__)
 
 # الرابط الأساسي للخدمة على Render (يتم جلب الرابط تلقائياً أو استبداله برابط مشروعك)
 # الرابط الخاص بك: https://new-wethar-bot-py.onrender.com
