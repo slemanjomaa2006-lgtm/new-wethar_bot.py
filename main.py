@@ -35,8 +35,7 @@ def send_welcome(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
     markup.add(types.KeyboardButton("🌤️ طقس اللاذقية مباشر"), types.KeyboardButton("💵 سعر الدولار"))
     bot.reply_to(message, "أهلاً بك يا مطور سلمان. تم ربط الأسعار الحية تلقائياً 24 ساعة!", reply_markup=markup)
-@bot.message_handler(func=lambda m: m.text == "⛅ طقس اللاذقية مباشر")
-@bot.message_handler(func=lambda m: m.text == "⛅ طقس اللاذقية مباشر")
+@bot.message_@bot.message_handler(func=lambda m: m.text == "⛅ طقس اللاذقية مباشر")
 def get_weather(message):
     try:
         # استخدام صيغة بديلة للطقس تضمن استجابة أسرع للسيرفر
@@ -64,4 +63,4 @@ def get_dollar_rates(message):
         bot.reply_to(message, report, parse_mode="Markdown")
     except:
         bot.delete_message(message.chat.id, waitingmsg.message_id)
-        bot.reply_to(message, "❌ نعتذر، حدث خطأ أثناء جلب الأسعار الحية.")
+        bot.reply_to(message, "❌ نعتذر، حدث خطأ أثناء جلب الأسعار الحية.")handler(func=lambda m: m.text == "⛅ طقس اللاذقية مباشر")
