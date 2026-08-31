@@ -40,7 +40,7 @@ def send_welcome(message):
 def get_weather(message):
    try:
         r = requests.get("https://wttr.in", timeout=10).json()
-           temp_air = int(r['current_condition'][0]['temp_C'])
+        temp_air = int(r['current_condition'][0]['temp_C'])
     except:
         temp_air = 22
     temp_surface = temp_air - 2
