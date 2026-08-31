@@ -32,13 +32,12 @@ def receive_update():
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
-@bot.message_handler(func=lambda m: m.text =="💵 سعر الدولار")
-    markup.add(types.KeyboardButton("🌤️ طقس اللاذقية مباشر"), types.KeyboardButton("💵 أسعار الدولار المحدثة"))
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    markup.add(types.KeyboardButton("🌤️ طقس اللاذقية مباشر"), types.KeyboardButton("💵 سعر الدولار"))
     bot.reply_to(message, "أهلاً بك يا مطور سلمان. تم ربط الأسعار الحية تلقائياً 24 ساعة!", reply_markup=markup)
 
 @bot.message_handler(func=lambda m: m.text == "🌤️ طقس اللاذقية مباشر")
 def get_weather(message):
-    try:
         r = requests.get("https://wttr.in", timeout=10).json()
         temp_air = int(r['current_condition']['temp_C'])
     except: temp_air = 22
