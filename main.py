@@ -12,21 +12,22 @@ bot = telebot.TeleBot(BOT_TOKEN)
 # 2. إنشاء خادم الويب المتوافق برمجياً مع Render
 app = Flask(__name__)
 
-# الرابط الأساسي للخدمة على Render (يتم جلب الرابط تلقائياً أو استبداله برابط مشروعك)
-# الرابط الخاص بك: https://new-wethar-bot-py.onrender.com
+# الرابط الخاص بمشروعك
 WEBHOOK_URL = "https://onrender.com"
 
 @app.route('/' + BOT_TOKEN, methods=['POST'])
 def getMessage():
-    json_string = request.get_data().decode('utf-8')
-    update = telebot.types.Update.de_json(json_string)
-    bot.process_new_updates([update])
-    return "!", 200
+    try:
+        json_string = request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return "!", 200
+    except Exception as e:
+        print(f"Error processing update: {e}")
+        return "Error", 500
 
 @app.route("/")
 def webhook():
-    bot.remove_webhook()
-    bot.set_webhook(url=WEBHOOK_URL + BOT_TOKEN)
     return "البوت يعمل بنشاط وببيانات حية 24 ساعة مجاناً عبر الـ Webhook! 🚀", 200
 
 # دالة جلب طقس اللاذقية الحي والمباشر
@@ -80,5 +81,13 @@ def handle_services(message):
         bot.reply_to(message, "❌ عذراً سلمان، يرجى الضغط على الأزرار الظاهرة في الأسفل فقط.")
 
 if __name__ == '__main__':
+    # تفعيل الـ Webhook مرة واحدة فقط عند إقلاع السيرفر لضمان الاستقرار ومنع خطأ 500
+    try:
+        bot.remove_webhook()
+        bot.set_webhook(url=WEBHOOK_URL + BOT_TOKEN)
+        print("Webhook set successfully!")
+    except Exception as e:
+        print(f"Failed to set webhook: {e}")
+        
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
