@@ -38,7 +38,7 @@ def send_welcome(message):
 
 @bot.message_handler(func=lambda m: m.text == "🌤️ طقس اللاذقية مباشر")
 def get_weather(message):
-   try:
+    try:
         r = requests.get("https://wttr.in", timeout=10).json()
         temp_air = int(r['current_condition'][0]['temp_C'])
     except:
