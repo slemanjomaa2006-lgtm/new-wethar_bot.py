@@ -1,4 +1,4 @@
-[31/08/2026 06:14 م] ..: import telebot
+import telebot
 from telebot import types
 import requests
 from threading import Thread
