@@ -39,7 +39,7 @@ def send_welcome(message):
 @bot.message_handler(func=lambda m: m.text == "🌤️ طقس اللاذقية مباشر")
 def get_weather(message):
     r = requests.get("https://wttr.in", timeout=10).json()
-        temp_air = int(r['current_condition']['temp_C'])
+        temp_air = int(r['current_condition'][0]['temp_C'])
     except: temp_air = 22
         temp_surface = temp_air - 2
     report = f"📍 طقس محافظة اللاذقية الحصري:\n━━━━━━━━━━━━━━━━━━\n🌡️ درجة حرارة الجو الحالية: {temp_air}°C\n🌍 حرارة السطح الحية (المولّدة): {temp_surface}°C\n🛡️ _وضع الحماية السحابي نشط._"
