@@ -2,24 +2,32 @@
 import telebot
 from telebot import types
 import requests
-from threading import Thread
+from flask import Flask, request
 import os
 
 # 1. التوكن الخاص ببوت سلمان
 BOT_TOKEN = "8702344053:AAHqe6_HtIdNhUaF6rE1fwqSouaqpn0wabU"
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# 2. إنشاء خادم ويب خلفي لضمان استمرار الاستضافة المجانية على Render
-from flask import Flask
-app = Flask('')
+# 2. إنشاء خادم الويب المتوافق برمجياً مع Render
+app = Flask(name)
 
-@app.route('/')
-def home():
-    return "البوت يعمل بنشاط وببيانات حية 24 ساعة مجاناً! 🚀"
+# الرابط الأساسي للخدمة على Render (يتم جلب الرابط تلقائياً أو استبداله برابط مشروعك)
+# الرابط الخاص بك: https://new-wethar-bot-py.onrender.com
+WEBHOOK_URL = "https://onrender.com"
 
-def run_flask():
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
+@app.route('/' + BOT_TOKEN, methods=['POST'])
+def getMessage():
+    json_string = request.get_data().decode('utf-8')
+    update = telebot.types.Update.de_json(json_string)
+    bot.process_new_updates([update])
+    return "!", 200
+
+@app.route("/")
+def webhook():
+    bot.remove_webhook()
+    bot.set_webhook(url=WEBHOOK_URL + BOT_TOKEN)
+    return "البوت يعمل بنشاط وببيانات حية 24 ساعة مجاناً عبر الـ Webhook! 🚀", 200
 
 # دالة جلب طقس اللاذقية الحي والمباشر
 def get_weather():
@@ -34,24 +42,19 @@ def get_weather():
     except Exception:
         return "⚠️ خادم الطقس العالمي مشغول حالياً، الأجواء ساحلية معتدلة ورطبة مستقرة عموماً باللاذقية."
 
-# دالة جلب سعر الدولار الحي في سوريا عبر API مباشر (بدون مكتبة bs4)
+# دالة جلب سعر الدولار الحي في سوريا عبر API مباشر
 def get_dollar_rate():
     try:
-        # استدعاء مصدر بيانات مباشر وسريع يعطي السعر الموازي في سوريا بدقة وبصيغة خفيفة
         url = "https://exchangerate-api.com"
         response = requests.get(url, timeout=7)
         data = response.json()
         
-        # جلب السعر العالمي المرجعي وتعديله ديناميكياً ليطابق السوق الموازي بدقة (الليرة اليوم)
         base_rate = data['rates']['SYP'] if 'SYP' in data['rates'] else 15000
-        
-        # حساب مبيع وشراء متوافق مع السوق اللحظي الحالي
         sell_price = int(base_rate)
         buy_price = sell_price - 100
         
         return f"💵 سعر صرف الدولار في سوريا (السوق الموازي) الحي واللحظي اليوم:\n• سعر الشراء: {buy_price:,} ليرة\n• سعر المبيع: {sell_price:,} ليرة"
     except Exception:
-        # احتياطي ثابت محدث بالأسعار الحالية للسوق الموازي في حال انقطاع الـ API
         return "💵 سعر صرف الدولار في سوريا اليوم (محدث):\n• سعر الشراء: 131.50 ليرة جديدة\n• سعر المبيع: 132.00 ليرة جديدة"
 
 # عند إرسال /start تظهر الأزرار تلقائياً
@@ -76,10 +79,6 @@ def handle_services(message):
     else:
         bot.reply_to(message, "❌ عذراً سلمان، يرجى الضغط على الأزرار الظاهرة في الأسفل فقط.")
 
-# تشغيل خادم الويب والبوت معاً في خيوط مستقلة
 if __name__ == '__main__':
-    t = Thread(target=run_flask)
-    t.start()
-    
-    print("تم تفعيل بوت اللاذقية المطور بالبيانات الحية المباشرة...")
-    bot.infinity_polling()
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port)
