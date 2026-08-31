@@ -1,4 +1,4 @@
-import telebot
+[31/08/2026 06:14 م] ..: import telebot
 from telebot import types
 import requests
 from threading import Thread
@@ -88,7 +88,7 @@ def handle_services(message):
         bot.reply_to(message, get_dollar_rate())
     else:
         bot.reply_to(message, "❌ عذراً سلمان، يرجى الضغط على الأزرار الظاهرة في الأسفل فقط.")
-if __name__ == '__main__':
+ if __name__ == '__main__':
     try:
         bot.remove_webhook()
         time.sleep(0.5)
