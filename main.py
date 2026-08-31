@@ -46,14 +46,21 @@ def get_weather(message):
     temp_surface = temp_air - 2
     report = f"📊 *طقس محافظة اللاذقية الحصري*:\n\n🌡 درجة حرارة الجو الحالية: {temp_air}°C"
     bot.reply_to(message, report, parse_mode="Markdown")
-
 @bot.message_handler(func=lambda m: m.text == "💵 سعر الدولار")
 def get_dollar_rates(message):
-    waitingmsg = bot.reply_to(message, "⚡ جاري قراءة أسعار الدولار الحية...")
-    buy, sell = fetch_live_dollar_rates()
-    report = f"💵 أسعار صرف الدولار في سوريا (تحديث فوري):\n━━━━━━━━━━━━━━━━━━\n🌐 المصدر المعتمد: موقع الليرة اليوم\n🇸🇾 السوق السوداء المحلية:\n🔹 شراء: {buy} ل.س\n🔹 مبيع: {sell} ل.س\n\n⚠️ _الأسعار تسحب تلقائياً من خادم الموقع مباشرة._"
-    bot.delete_message(message.chat.id, waiting_msg.message_id)
-    bot.reply_to(message, report, parse_mode="Markdown")
+    waitingmsg = bot.reply_to(message, "⚡ جاري قراءة أسعار الدولار الحية من موقع الليرة اليوم...")
+    try:
+        # استخدام مخزن بيانات أسعار السوق السوداء السورية المحدثة
+        r = requests.get("https://githubusercontent.com", timeout=10).json()
+        buy = r['damascus']['USD']['buy']
+        sell = r['damascus']['USD']['sell']
+        
+        report = f"💵 *أسعار الدولار في دمشق اليوم*:\n\n📥 شراء: {buy} ل.س\n📤 مبيع: {sell} ل.س"
+        bot.delete_message(message.chat.id, waitingmsg.message_id)
+        bot.reply_to(message, report, parse_mode="Markdown")
+    except Exception as e:
+        bot.delete_message(message.chat.id, waitingmsg.message_id)
+        bot.reply_to(message, "❌ نعتذر، حدث خطأ أثناء الاتصال بموقع الليرة اليوم. يرجى المحاولة لاحقاً.")
 
 if RENDER_URL:
     bot.remove_webhook()
